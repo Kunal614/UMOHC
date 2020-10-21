@@ -4,7 +4,6 @@ IPL bot For Discord
 https://discord.com/api/oauth2/authorize?client_id=761525483015503922&permissions=0&scope=bot
 
 # Commands [+]
- * cm      -> Shows IPL Live Comentatry
  * four    -> Spam Four
  * freehit -> Spam Freehit
  * hello   
@@ -17,3 +16,4 @@ https://discord.com/api/oauth2/authorize?client_id=761525483015503922&permission
  * pt     -> Shows IPL point table
  * sc     -> Shows IPL Schedule (Add agrue [+sc 2 ,3 , 4..])
  * six    -> Spam Six
+ 
