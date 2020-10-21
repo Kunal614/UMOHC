@@ -1,6 +1,6 @@
 # UMOHC
 IPL bot For Discord
-# Add This Bot to you Repo 
+# Add This Bot In Yout Server
 https://discord.com/api/oauth2/authorize?client_id=761525483015503922&permissions=0&scope=bot
 
 # Commands [+]
