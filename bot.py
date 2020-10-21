@@ -18,7 +18,6 @@ import datetime
 from datetime import datetime
 import pandas as pd
 import time
-# NzU0Mjg1NzUzNDU0MDM0OTg0.X1yhWQ.a4qGLUjqUJksH7_xWYDsW2jkX0w
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
