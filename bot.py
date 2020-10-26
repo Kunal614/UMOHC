@@ -18,6 +18,7 @@ import datetime
 from datetime import datetime
 import pandas as pd
 import time
+# NzU0Mjg1NzUzNDU0MDM0OTg0.X1yhWQ.a4qGLUjqUJksH7_xWYDsW2jkX0w
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -268,9 +269,16 @@ async def ipl(ctx , *args):
 
 async def lb(ctx):
     await ctx.trigger_typing()
-    url = "https://www.cricbuzz.com/live-cricket-scores/30469/kxip-vs-dc-38th-match-indian-premier-league-2020"
+    url = "https://www.cricbuzz.com/cricket-schedule/upcoming-series/league"
+    
+    res = requests.get(url , headers=ua)
+    
+    soup  =BeautifulSoup(res.content , features='lxml')
+    data1 = soup.findAll('div' , {'class':'cb-adjst-lst'})
+    y = data1[0].find('a').get('href')
+    url1 = 'https://www.cricbuzz.com'+str(y)
     loop = asyncio.get_event_loop()
-    future = loop.run_in_executor(None, requests.get, url)
+    future = loop.run_in_executor(None, requests.get, url1)
     res = await future
     soup = BeautifulSoup(res.content , features='lxml')
 
@@ -291,7 +299,7 @@ async def lb(ctx):
                 desc+=j.get_text()+"   "
     desc += '```'
     embed.description = desc
-    print(desc)
+    # print(desc)
     if desc =='```arm'+"\n"+'```':                
         return await ctx.send("No Current Match is going")
 
