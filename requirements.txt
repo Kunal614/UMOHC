@@ -1,7 +1,6 @@
 discord.py==1.4.1
 python-dotenv==0.14.0
 
-requests==2.22.0
 numpy==1.19.1
 asyncio==3.4.3 
 python-dateutil==2.7.3
