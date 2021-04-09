@@ -79,8 +79,21 @@ def get_score(team):
             tm+=i
         # print(tm)
     tm+='\n'
-    tm+=team[ind+2:]
-    return tm   
+    
+    y =team[ind+2:]
+    flag = 0
+    for index  , i in enumerate(y):
+        if not i.isalpha() and flag==0:
+            # print(i)
+            tm+="  "+i
+            flag = 1
+        elif not i.isalpha() and flag==1:
+            # print(i)
+            tm+=i
+        else:
+            tm+=i
+    return tm 
+    
          
 
 
@@ -116,7 +129,7 @@ async def ls(ctx):
     future = loop.run_in_executor(None,requests.get,url)
     res = await future
     soup = BeautifulSoup(res.content , features='lxml')
-    head = soup.findAll(class_='cb-lv-scrs-well-live')
+    head = soup.findAll(class_='cb-lv-scrs-well-complete')
     y =  get_score(head[0].get_text().lstrip())
     print(y)
     
