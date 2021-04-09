@@ -1,7 +1,5 @@
 import os
-
 import random
-
 from dotenv import load_dotenv
 
 from discord.ext import commands
@@ -18,9 +16,9 @@ from fake_useragent import UserAgent
 
 import datetime
 from datetime import datetime
-
+import pandas as pd
 import time
-
+# NzU0Mjg1NzUzNDU0MDM0OTg0.X1yhWQ.a4qGLUjqUJksH7_xWYDsW2jkX0w
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -32,19 +30,19 @@ ua={"UserAgent":'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:69.0) Gecko/20100101
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
     while True:
-        await bot.change_presence(activity=discord.Game(name="Ipl 2020"))
+        await bot.change_presence(activity=discord.Game(name="Ipl 2021"))
         await asyncio.sleep(10)
-        await bot.change_presence(activity=discord.Game(name="Ipl20 Live Score"))
+        await bot.change_presence(activity=discord.Game(name="Ipl21 Live Score"))
         await asyncio.sleep(10)
-        await bot.change_presence(activity=discord.Game(name="Ipl20 Schedule"))
+        await bot.change_presence(activity=discord.Game(name="Ipl21 Schedule"))
         await asyncio.sleep(10)
-        await bot.change_presence(activity=discord.Game(name="Ipl20 Next Match"))
+        await bot.change_presence(activity=discord.Game(name="Ipl21 Next Match"))
         await asyncio.sleep(10)
-        await bot.change_presence(activity=discord.Game(name="Ipl20 Point Table"))
+        await bot.change_presence(activity=discord.Game(name="Ipl21 Point Table"))
         await asyncio.sleep(10)
-        await bot.change_presence(activity=discord.Game(name="Ipl20 Comentatry"))
+        await bot.change_presence(activity=discord.Game(name="Ipl21 Comentatry"))
         await asyncio.sleep(10)
-        await bot.change_presence(activity=discord.Game(name="Ipl20 Live Score Board"))
+        await bot.change_presence(activity=discord.Game(name="Ipl21 Live Score Board"))
         await asyncio.sleep(10)
         await bot.change_presence(activity=discord.Game(name="Spamming"))
         await asyncio.sleep(10)
@@ -60,6 +58,31 @@ async def on_ready():
 async def stts(ctx):
     await ctx.trigger_typing()
     await ctx.send(f"Namaste {ctx.author.mention}")
+
+def get_score(team):
+    flag=0
+    tm =""
+    ind= 0
+    for index , i in enumerate(team):
+        if i == ')':
+            tm = tm + i
+            ind = index
+            break
+        elif not i.isalpha() and flag==0:
+            # print(i)
+            tm+="  "+i
+            flag = 1
+        elif not i.isalpha() and flag==1:
+            # print(i)
+            tm+=i
+        else:
+            tm+=i
+        # print(tm)
+    tm+='\n'
+    tm+=team[ind+2:]
+    return tm   
+         
+
 
 def get_right(team):
     flag=0
@@ -84,24 +107,24 @@ def get_right(team):
 async def ls(ctx):
     await ctx.trigger_typing()
 
-    url = "https://iplt20api.herokuapp.com/livescore"
+    # url = "https://iplt20api.herokuapp.com/livescore"
+    url="https://www.cricbuzz.com/cricket-match/live-scores"
+    res = requests.get(url , headers = ua)
+    
+    
     loop = asyncio.get_event_loop()
     future = loop.run_in_executor(None,requests.get,url)
     res = await future
-    y = res.json()
-    head = y['Headline']
-    status = y['Status']
-    Team1 = y['Team1']
-    Team2 = y['Team2']
-    flag=0
-    tm1 = get_right(Team1)
-    tm2 = get_right(Team2)
-    embed = discord.Embed(color=0x7e76dc, title='IPL 2020 Live Score')
+    soup = BeautifulSoup(res.content , features='lxml')
+    head = soup.findAll(class_='cb-lv-scrs-well-live')
+    y =  get_score(head[0].get_text().lstrip())
+    print(y)
+    
+    embed = discord.Embed(color=0x7e76dc, title='IPL 2021 Live Score')
     desc='```arm\n'
-    desc+=head+"\n"
-    desc+=tm1+"\n"
-    desc+=tm2+"\n"
-    desc+=status+"\n"
+    desc+=y+"\n"
+    # desc+=tm2+"\n"
+    # desc+=status+"\n"
     desc += '```'
     embed.description = desc
     await ctx.send(embed=embed)
@@ -116,7 +139,7 @@ async def nm(ctx):
     future = loop.run_in_executor(None, requests.get, url)
     res = await future
     y = res.json()
-    embed = discord.Embed(color=0x7e76dc, title='IPL 2020 Next Match')
+    embed = discord.Embed(color=0x7e76dc, title='IPL 2021 Next Match')
     desc='```arm\n'
     desc+= y['Team']+"\n"
     desc+=y['Date']+"\n"
@@ -133,7 +156,7 @@ async def sc(ctx , cnt:int):
     await ctx.trigger_typing()
     if cnt >=18:
         return await ctx.send(f"Sorry {ctx.author.mention} I Can Only Respond Upto 17 Count  "+emoji.emojize(":pensive:"))
-    url = "https://www.firstpost.com/firstcricket/cricket-schedule/series/ipl-2020.html"
+    url = "https://www.firstpost.com/firstcricket/cricket-schedule/series/ipl-2021.html"
     loop = asyncio.get_event_loop()
     future = loop.run_in_executor(None, requests.get, url)
     res = await future
@@ -142,7 +165,7 @@ async def sc(ctx , cnt:int):
     team_name = soup.findAll(class_='sc-match-name')
     time = soup.findAll(class_='sc-label-val')
     tm=0
-    embed = discord.Embed(color=0xff0000, title='Ipl 2020 Schedule ')
+    embed = discord.Embed(color=0xff0000, title='Ipl 2021 Schedule ')
     desc='```\n'
     for i in range(0 , cnt):
         if i < len(data) and i <len(team_name) and tm < len(time):
@@ -169,7 +192,7 @@ async def sc(ctx , cnt:int):
 @bot.command(help='Shows IPL point table')
 async def pt(ctx):
 	await ctx.trigger_typing()
-	url = 'https://www.espncricinfo.com/series/_/id/8048/season/2020/indian-premier-league'
+	url = 'https://www.espncricinfo.com/series/ipl-2021-1249214'
 	loop = asyncio.get_event_loop()
 	future = loop.run_in_executor(None, requests.get, url)
 	res = await future
@@ -207,7 +230,7 @@ async def pt(ctx):
 			nr.append(y)
 			flag=0
 
-	embed = discord.Embed(color=0x7e76dc, title='IPL 2020 Point Table')
+	embed = discord.Embed(color=0x7e76dc, title='IPL 2021 Point Table')
 	desc='```arm\n'
 	desc+='Team  Match  Win  Loss  Point   NRR\n'
 	desc+='----  -----  ---  ----  -----  -----\n'
@@ -310,41 +333,41 @@ async def lb(ctx):
     
 
 
-@bot.command(help='Shows IPL Live Comentatry')
+# @bot.command(help='Shows IPL Live Comentatry')
 
-async def cm(ctx):
+# async def cm(ctx):
     
-    await ctx.trigger_typing()
-    url="https://www.espncricinfo.com/series/8048/game/1216533/chennai-super-kings-vs-rajasthan-royals-37th-match-indian-premier-league-2020-21"
-    print(ctx.author.id) 
-    if str(ctx.author.id) != "640108121804636160":
-        return await ctx.send("This Operation is only performed by Owner")  
+#     await ctx.trigger_typing()
+#     url="https://www.espncricinfo.com/series/8048/game/1216533/chennai-super-kings-vs-rajasthan-royals-37th-match-indian-premier-league-2020-21"
+#     print(ctx.author.id) 
+#     if str(ctx.author.id) != "640108121804636160":
+#         return await ctx.send("This Operation is only performed by Owner")  
 
-    store=""
-    dict1={}
-    while(True):
-        store=""
-        res = requests.get(url , headers=ua)
-        soup = BeautifulSoup(res.content , features='lxml')
-        data = soup.findAll(class_='match-comment-long-text')
-        ball_up = soup.findAll(class_='match-comment-short-text')
-        store+=ball_up[0].get_text()+"\n"
-        store+=data[0].get_text()+"\n"
-        if store in dict1:
-            time.sleep(10)
-            continue
-        dict1[store]=1
-        now = datetime.now().time() # time object
-        now = str(now)
-        embed = discord.Embed(color=0x7e76dc, title="Time ->"+now[:5])
-        desc='```arm\n'
-        desc+= ball_up[0].get_text()
-        desc+="\n"
-        desc+=data[0].get_text()
-        desc += '```'
-        embed.description = desc
-        # print(store)
-        await ctx.send(embed=embed)
+#     store=""
+#     dict1={}
+#     while(True):
+#         store=""
+#         res = requests.get(url , headers=ua)
+#         soup = BeautifulSoup(res.content , features='lxml')
+#         data = soup.findAll(class_='match-comment-long-text')
+#         ball_up = soup.findAll(class_='match-comment-short-text')
+#         store+=ball_up[0].get_text()+"\n"
+#         store+=data[0].get_text()+"\n"
+#         if store in dict1:
+#             time.sleep(10)
+#             continue
+#         dict1[store]=1
+#         now = datetime.now().time() # time object
+#         now = str(now)
+#         embed = discord.Embed(color=0x7e76dc, title="Time ->"+now[:5])
+#         desc='```arm\n'
+#         desc+= ball_up[0].get_text()
+#         desc+="\n"
+#         desc+=data[0].get_text()
+#         desc += '```'
+#         embed.description = desc
+#         # print(store)
+#         await ctx.send(embed=embed)
 
 
 
