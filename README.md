@@ -16,4 +16,6 @@ https://discord.com/api/oauth2/authorize?client_id=761525483015503922&permission
  * sc     -> Shows IPL Schedule (Add agrue [+sc 2 ,3 , 4..])
  * six    -> Spam Six
  * stats  -> For Key Status
+ * next_batsman -> Give Next Batsman
+ * batsman_left -> Give Yet To Bat
  

@@ -369,7 +369,9 @@ async def stats(ctx):
     y = data1[0].find('a').get('href')
     url1 = 'https://www.cricbuzz.com'+str(y)
     # print(url1)
-    res = requests.get(url1)
+    loop = asyncio.get_event_loop()
+    future = loop.run_in_executor(None, requests.get, url1)
+    res = await future
     soup = BeautifulSoup(res.content , features='lxml')
 
     data = soup.findAll(class_='cb-key-st-lst')
@@ -378,7 +380,7 @@ async def stats(ctx):
     embed = discord.Embed(color=0x7e76dc, title="Key Stats")
     desc='```arm\n'
     desc+=data[0].get_text()[13:33]+'\n'
-    rest = data[0].get_text()[36:].split(':')
+    rest = data[0].get_text()[32:].split(':')
     desc+=rest[0]+' : '+rest[1].split(',')[0].strip()+' ,'+rest[1].split(',')[1].strip()[0:7] +'\n'
     desc+=rest[1].split(',')[1].strip()[9:]+' : '+rest[len(rest)-1]+'\n'
     desc += '```'
