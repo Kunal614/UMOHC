@@ -14,7 +14,7 @@ import discord
 
 from fake_useragent import UserAgent
 
-import datetime
+
 from datetime import datetime
 import pandas as pd
 import time
@@ -129,11 +129,14 @@ async def ls(ctx):
     future = loop.run_in_executor(None,requests.get,url)
     res = await future
     soup = BeautifulSoup(res.content , features='lxml')
-    head = soup.findAll(class_='cb-lv-scrs-well-complete')
-    y =  get_score(head[0].get_text().lstrip())
+    head = soup.findAll(class_='cb-lv-scrs-well-live') #cb-lv-scrs-well-live cb-lv-scrs-well-complete
+    if len(head) > 0:
+        y =  get_score(head[0].get_text().lstrip())
+    else:
+        y = "No Current Match Is Running"
     print(y)
     
-    embed = discord.Embed(color=0x7e76dc, title='IPL 2021 Live Score')
+    embed = discord.Embed(color=0x7e76dc, title='Live Score')
     desc='```arm\n'
     desc+=y+"\n"
     # desc+=tm2+"\n"
@@ -144,7 +147,7 @@ async def ls(ctx):
 
     # await ctx.send(head + "\n" + tm1 + "\n"+tm2 + "\n" + status)    
 
-@bot.command(help='Shows IPL Next Match')
+@bot.command()
 async def nm(ctx):
     await ctx.trigger_typing()
     url = "https://iplt20api.herokuapp.com/nextmatch"
@@ -167,7 +170,7 @@ Team_name=['DC', 'CSK','RCB','KKR','KXIP','RR','MI','SRH']
 
 async def sc(ctx , cnt:int):
     await ctx.trigger_typing()
-    if cnt >=18:
+    if cnt >=15:
         return await ctx.send(f"Sorry {ctx.author.mention} I Can Only Respond Upto 17 Count  "+emoji.emojize(":pensive:"))
     url = "https://www.firstpost.com/firstcricket/cricket-schedule/series/ipl-2021.html"
     loop = asyncio.get_event_loop()
@@ -178,15 +181,19 @@ async def sc(ctx , cnt:int):
     team_name = soup.findAll(class_='sc-match-name')
     time = soup.findAll(class_='sc-label-val')
     tm=0
+    day = datetime.now().date().day
+    # print(day , "cfdscdfc")
     embed = discord.Embed(color=0xff0000, title='Ipl 2021 Schedule ')
     desc='```\n'
-    for i in range(0 , cnt):
+    i = 0
+    k = 1
+    while k <= cnt:
         if i < len(data) and i <len(team_name) and tm < len(time):
             y = data[i].get_text().strip()
-            
             y = y.replace('\n' , ' ')
             y = y.replace('\t' , '')
             y = y[:6]
+            # print(y.split(' ')[0],'decfdcdffvfd')
             p = time[tm].get_text().strip()
             p = p.replace('\n' , ' ')
             p = p.replace('\t' , '')
@@ -194,13 +201,19 @@ async def sc(ctx , cnt:int):
             r = r.replace('\n' , ' ')
             r = r.replace('\t' , '')
             tm=tm+2
-            desc+=team_name[i].get_text().strip()+'\n'+p+"  "+r+" "+y+"\n\n"
-            desc+='```'+'```'+'\n\n'
-
-
+            if int(y.split(' ')[0]) >= int(day):
+                k = k+1
+                desc+=team_name[i].get_text().strip()+'\n'+p+"  "+r+" "+y+"\n\n"
+                # print(k)
+                if k <= cnt:
+                    desc+='```'+'```'+'\n\n'
+            i = i+1
+          
     desc += '```'
     embed.description = desc
     await ctx.send(embed=embed)
+
+
 
 @bot.command(help='Shows IPL point table')
 async def pt(ctx):
@@ -339,13 +352,38 @@ async def lb(ctx):
     embed.description = desc
     # print(desc)
     if desc =='```arm'+"\n"+'```':                
-        return await ctx.send("No Current Match is going")
+        return await ctx.send("No Current IPL Match Is Going")
 
     await ctx.send(embed=embed)            
 
     
+@bot.command(help = 'Shows stats')
 
+async def stats(ctx):
+    await ctx.trigger_typing()
+    url = "https://www.cricbuzz.com/cricket-schedule/upcoming-series/league"
+    res = requests.get(url , headers=ua)
 
+    soup  =BeautifulSoup(res.content , features='lxml')
+    data1 = soup.findAll('div' , {'class':'cb-adjst-lst'})
+    y = data1[0].find('a').get('href')
+    url1 = 'https://www.cricbuzz.com'+str(y)
+    # print(url1)
+    res = requests.get(url1)
+    soup = BeautifulSoup(res.content , features='lxml')
+
+    data = soup.findAll(class_='cb-key-st-lst')
+    if len(data)==0 :
+        return await ctx.send("No Current IPL Match Is Going")
+    embed = discord.Embed(color=0x7e76dc, title="Key Stats")
+    desc='```arm\n'
+    desc+=data[0].get_text()[13:33]+'\n'
+    rest = data[0].get_text()[36:].split(':')
+    desc+=rest[0]+' : '+rest[1].split(',')[0].strip()+' ,'+rest[1].split(',')[1].strip()[0:7] +'\n'
+    desc+=rest[1].split(',')[1].strip()[9:]+' : '+rest[len(rest)-1]+'\n'
+    desc += '```'
+    embed.description = desc
+    await ctx.send(embed=embed) 
 # @bot.command(help='Shows IPL Live Comentatry')
 
 # async def cm(ctx):
